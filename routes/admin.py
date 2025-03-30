@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash, abort
 from flask_login import login_required, current_user
-from models import User, Subject, Chapter, Quiz, Question, Score, db
+from models import User, Subject, Chapter, Quiz, Question, Score, Answer, db
 from datetime import datetime
 from functools import wraps
 
@@ -98,15 +98,11 @@ def edit_subject(id):
 def delete_subject(id):
     subject = Subject.query.get_or_404(id)
     
-    # Check if the subject has chapters
-    if subject.chapters:
-        flash('Cannot delete subject with chapters. Delete chapters first.', 'danger')
-        return redirect(url_for('admin.subjects'))
-    
+    # Delete the subject and let cascade delete handle related records
     db.session.delete(subject)
     db.session.commit()
     
-    flash('Subject deleted successfully', 'success')
+    flash('Subject and all related data deleted successfully', 'success')
     return redirect(url_for('admin.subjects'))
 
 # Chapter Management
@@ -163,15 +159,11 @@ def delete_chapter(id):
     chapter = Chapter.query.get_or_404(id)
     subject_id = chapter.subject_id
     
-    # Check if the chapter has quizzes
-    if chapter.quizzes:
-        flash('Cannot delete chapter with quizzes. Delete quizzes first.', 'danger')
-        return redirect(url_for('admin.chapters', subject_id=subject_id))
-    
+    # Delete the chapter and let cascade delete handle related records
     db.session.delete(chapter)
     db.session.commit()
     
-    flash('Chapter deleted successfully', 'success')
+    flash('Chapter and all related data deleted successfully', 'success')
     return redirect(url_for('admin.chapters', subject_id=subject_id))
 
 # Quiz Management
@@ -250,20 +242,11 @@ def delete_quiz(id):
     quiz = Quiz.query.get_or_404(id)
     chapter_id = quiz.chapter_id
     
-    # Check if the quiz has questions
-    if quiz.questions:
-        flash('Cannot delete quiz with questions. Delete questions first.', 'danger')
-        return redirect(url_for('admin.quizzes', chapter_id=chapter_id))
-    
-    # Check if the quiz has been taken by users
-    if quiz.scores:
-        flash('Cannot delete quiz with scores. Delete scores first.', 'danger')
-        return redirect(url_for('admin.quizzes', chapter_id=chapter_id))
-    
+    # Delete the quiz and let cascade delete handle related records
     db.session.delete(quiz)
     db.session.commit()
     
-    flash('Quiz deleted successfully', 'success')
+    flash('Quiz and all related data deleted successfully', 'success')
     return redirect(url_for('admin.quizzes', chapter_id=chapter_id))
 
 # Question Management
@@ -318,31 +301,37 @@ def edit_question(id):
     question = Question.query.get_or_404(id)
     
     if request.method == 'POST':
-        statement = request.form.get('statement')
+        # Get form data, handling empty fields properly
+        statement = request.form.get('question_statement')
         option1 = request.form.get('option1')
         option2 = request.form.get('option2')
         option3 = request.form.get('option3')
         option4 = request.form.get('option4')
         correct_option = request.form.get('correct_option')
         
-        if not statement or not option1 or not option2 or not option3 or not option4 or not correct_option:
-            flash('All fields are required', 'danger')
-            return redirect(url_for('admin.edit_question', id=id))
+        # Update the question with the new values - empty or not
+        if statement is not None:
+            question.question_statement = statement
+        if option1 is not None:
+            question.option1 = option1
+        if option2 is not None:
+            question.option2 = option2
+        if option3 is not None:
+            question.option3 = option3
+        if option4 is not None:
+            question.option4 = option4
+            
+        # Only validate correct_option if it's provided and not empty
+        if correct_option:
+            try:
+                correct_option_int = int(correct_option)
+                if correct_option_int < 1 or correct_option_int > 4:
+                    raise ValueError
+                question.correct_option = correct_option_int
+            except ValueError:
+                flash('Correct option must be a number between 1 and 4', 'danger')
+                return redirect(url_for('admin.edit_question', id=id))
         
-        try:
-            correct_option_int = int(correct_option)
-            if correct_option_int < 1 or correct_option_int > 4:
-                raise ValueError
-        except ValueError:
-            flash('Correct option must be a number between 1 and 4', 'danger')
-            return redirect(url_for('admin.edit_question', id=id))
-        
-        question.question_statement = statement
-        question.option1 = option1
-        question.option2 = option2
-        question.option3 = option3
-        question.option4 = option4
-        question.correct_option = correct_option_int
         db.session.commit()
         
         flash('Question updated successfully', 'success')
@@ -356,10 +345,11 @@ def delete_question(id):
     question = Question.query.get_or_404(id)
     quiz_id = question.quiz_id
     
+    # Delete the question and let cascade delete handle related answers
     db.session.delete(question)
     db.session.commit()
     
-    flash('Question deleted successfully', 'success')
+    flash('Question and all related data deleted successfully', 'success')
     return redirect(url_for('admin.questions', quiz_id=quiz_id))
 
 # User Management

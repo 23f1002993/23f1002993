@@ -97,7 +97,7 @@ class Answer(db.Model):
 
       # Relationships
     score = db.relationship('Score', backref=db.backref('answers', lazy=True, cascade="all, delete-orphan"))
-    question = db.relationship('Question', backref=db.backref('answers', lazy=True))
+    question = db.relationship('Question', backref=db.backref('answers', lazy=True, cascade="all, delete-orphan"))
     
     # Helper method to check if answer is correct
     def is_correct(self):
