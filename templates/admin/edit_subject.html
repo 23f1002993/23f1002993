@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Subject - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.subjects') }}">Subjects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit {{ subject.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Edit Subject</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.edit_subject', id=subject.id) }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Subject Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ subject.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ subject.description }}</textarea>
+                        <div class="form-text">Provide a brief description of what this subject covers.</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.subjects') }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Update Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

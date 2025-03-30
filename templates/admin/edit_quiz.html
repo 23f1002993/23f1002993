@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Quiz - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.subjects') }}">Subjects</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.chapters', subject_id=quiz.chapter.subject_id) }}">{{ quiz.chapter.subject.name }} - Chapters</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.quizzes', chapter_id=quiz.chapter_id) }}">{{ quiz.chapter.name }} - Quizzes</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit Quiz</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Edit Quiz</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.edit_quiz', id=quiz.id) }}">
+                    <div class="mb-3">
+                        <label for="date_of_quiz" class="form-label">Date of Quiz</label>
+                        <input type="date" class="form-control" id="date_of_quiz" name="date_of_quiz" value="{{ quiz.date_of_quiz }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="time_duration" class="form-label">Time Duration (HH:MM)</label>
+                        <input type="text" class="form-control" id="time_duration" name="time_duration" value="{{ quiz.time_duration }}" placeholder="00:30" required>
+                        <div class="form-text">Format: HH:MM (e.g., 00:30 for 30 minutes)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="remarks" name="remarks" rows="3">{{ quiz.remarks }}</textarea>
+                        <div class="form-text">Optional: Add any remarks about this quiz</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.quizzes', chapter_id=quiz.chapter_id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Update Quiz</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

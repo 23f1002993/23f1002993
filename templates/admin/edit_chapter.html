@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Chapter - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.subjects') }}">Subjects</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.chapters', subject_id=chapter.subject_id) }}">{{ chapter.subject.name }} - Chapters</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Edit {{ chapter.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Edit Chapter</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.edit_chapter', id=chapter.id) }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Chapter Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ chapter.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3">{{ chapter.description }}</textarea>
+                        <div class="form-text">Provide a brief description of what this chapter covers.</div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.chapters', subject_id=chapter.subject_id) }}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Update Chapter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

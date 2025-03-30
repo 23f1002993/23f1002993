@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow-lg border-0 rounded-lg mt-3">
+            <div class="card-header bg-primary text-white text-center">
+                <h3 class="my-2">Welcome to Quiz Master</h3>
+                <p class="mb-0">Login to your account</p>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <div class="small">
+                    <span>Need an account?</span> 
+                    <a href="{{ url_for('auth.register') }}">Sign up now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

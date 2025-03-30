@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center bg-primary text-white mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Subjects</h5>
+                <h2 class="display-4">{{ subjects|length }}</h2>
+                <a href="{{ url_for('user.subjects') }}" class="btn btn-light btn-sm mt-2">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center bg-success text-white mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Quizzes Taken</h5>
+                <h2 class="display-4">{{ quizzes_taken }}</h2>
+                <a href="{{ url_for('user.view_scores') }}" class="btn btn-light btn-sm mt-2">View Scores</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center bg-warning text-dark mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Average Score</h5>
+                <h2 class="display-4">{{ current_user.get_average_score() }}%</h2>
+                <a href="{{ url_for('user.charts') }}" class="btn btn-light btn-sm mt-2">View Charts</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center bg-info text-white mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Take a Quiz</h5>
+                <h2 class="display-4">New</h2>
+                <a href="{{ url_for('user.subjects') }}" class="btn btn-light btn-sm mt-2">Browse Quizzes</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Quizzes Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Available Quizzes</h5>
+                <a href="{{ url_for('user.subjects') }}" class="btn btn-sm btn-primary">Browse All Subjects</a>
+            </div>
+            <div class="card-body">
+                {% set all_quizzes = [] %}
+                
+                {% for subject in subjects %}
+                    {% for chapter in subject.chapters %}
+                        {% for quiz in chapter.quizzes %}
+                            {% set is_taken = false %}
+                            {% for score in quiz.scores %}
+                                {% if score.user_id == current_user.id %}
+                                    {% set is_taken = true %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% set _ = all_quizzes.append({
+                                'id': quiz.id,
+                                'subject': subject.name,
+                                'chapter': chapter.name,
+                                'date': quiz.date_of_quiz,
+                                'duration': quiz.time_duration,
+                                'is_taken': is_taken
+                            }) %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+                
+                <!-- Display All Quizzes -->
+                {% if all_quizzes %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Subject/Chapter</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for quiz in all_quizzes %}
+                            <tr>
+                                <td>{{ quiz.subject }} / {{ quiz.chapter }}</td>
+                                <td>{{ quiz.date }}</td>
+                                <td>{{ quiz.duration }}</td>
+                                <td>
+                                    {% if quiz.is_taken %}
+                                        {% for score in scores %}
+                                            {% if score.quiz_id == quiz.id %}
+                                                <a href="{{ url_for('user.view_score_detail', score_id=score.id) }}" class="btn btn-sm btn-success">View Score</a>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <a href="{{ url_for('user.take_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary">Take Quiz</a>
+                                    {% endif %}
+                                    <a href="{{ url_for('user.view_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-info">View Quiz</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">No quizzes available. Check back later or browse all subjects.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Scores Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Recent Scores</h5>
+                <a href="{{ url_for('user.view_scores') }}" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                {% if scores %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Quiz</th>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for score in scores %}
+                            <tr>
+                                <td>{{ score.quiz.chapter.subject.name }} - {{ score.quiz.chapter.name }}</td>
+                                <td>{{ score.time_stamp.strftime('%Y-%m-%d') }}</td>
+                                <td>{{ score.get_percentage() }}% ({{ score.get_grade() }})</td>
+                                <td>
+                                    {% if score.get_status() == 'Passed' %}
+                                    <span class="badge bg-success">Passed</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Failed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('user.view_score_detail', score_id=score.id) }}" class="btn btn-sm btn-info">View Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <p class="mb-0">You haven't taken any quizzes yet. <a href="{{ url_for('user.subjects') }}">Start now</a> to see your scores here.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dashboard loaded');
+    });
+</script>
+{% endblock %} 

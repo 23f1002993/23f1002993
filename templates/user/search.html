@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Results - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-3">
+        <div class="col">
+            <h1 class="display-5 mb-3">Search Results</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Search Results</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Search for subjects, chapters, or quizzes</h5>
+                    <form method="GET" action="{{ url_for('user.search') }}">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="query" value="{{ query }}" placeholder="Enter search terms...">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if not query %}
+        <div class="alert alert-info">Please enter a search term to see results.</div>
+    {% elif not subjects and not chapters and not quizzes %}
+        <div class="alert alert-warning">No results found for "{{ query }}".</div>
+    {% else %}
+        {% if subjects %}
+            <div class="row mb-4">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Subjects ({{ subjects|length }})</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                {% for subject in subjects %}
+                                    <a href="{{ url_for('user.subject_detail', subject_id=subject.id) }}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">{{ subject.name }}</h5>
+                                            <small>{{ subject.get_total_quizzes() }} quizzes</small>
+                                        </div>
+                                        <p class="mb-1">{{ subject.description }}</p>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if chapters %}
+            <div class="row mb-4">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">Chapters ({{ chapters|length }})</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                {% for chapter in chapters %}
+                                    <a href="{{ url_for('user.chapter_detail', chapter_id=chapter.id) }}" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">{{ chapter.name }}</h5>
+                                            <small>{{ chapter.subject.name }}</small>
+                                        </div>
+                                        <p class="mb-1">{{ chapter.description }}</p>
+                                        <small>{{ chapter.quizzes|length }} quizzes</small>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if quizzes %}
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Quizzes ({{ quizzes|length }})</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                {% for quiz in quizzes %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">Quiz on {{ quiz.subject_name }} - {{ quiz.chapter_name }}</h5>
+                                            <small>{{ quiz.date }}</small>
+                                        </div>
+                                        <div class="d-flex align-items-center mt-2">
+                                            <span class="badge rounded-pill {% if quiz.status == 'Taken' %}bg-success{% elif quiz.status == 'Open' %}bg-primary{% elif quiz.status == 'Coming Soon' %}bg-warning{% else %}bg-danger{% endif %} me-2">
+                                                {{ quiz.status }}
+                                            </span>
+                                            
+                                            {% if quiz.status == 'Open' %}
+                                                <a href="{{ url_for('user.take_quiz', quiz_id=quiz.id) }}" class="btn btn-sm btn-primary">Take Quiz</a>
+                                            {% elif quiz.status == 'Taken' %}
+                                                <a href="{{ url_for('user.score_detail', quiz_id=quiz.id) }}" class="btn btn-sm btn-success">View Score</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    console.log("Search results page loaded");
+</script>
+{% endblock %} 

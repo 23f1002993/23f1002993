@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Score Details - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.view_scores') }}">My Scores</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Score Details</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Quiz Result</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4>{{ score.quiz.chapter.subject.name }} - {{ score.quiz.chapter.name }}</h4>
+                        <p class="text-muted">Taken on {{ score.time_stamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <h1 class="display-4 fw-bold {{ 'text-success' if score.get_status() == 'Passed' else 'text-danger' }}">
+                            {{ score.get_percentage() }}%
+                        </h1>
+                        <div class="d-flex justify-content-md-end align-items-center">
+                            <span class="me-3">{{ score.correct_answers }}/{{ score.total_questions }} Points</span>
+                            <span class="badge {{ 'bg-success' if score.get_status() == 'Passed' else 'bg-danger' }} p-2">
+                                {{ score.get_status() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Grade</h5>
+                                <h2 class="display-5 fw-bold">{{ score.get_grade() }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Duration</h5>
+                                <h2 class="display-5 fw-bold">{{ score.quiz.time_duration }} min</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100 bg-light">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Questions</h5>
+                                <h2 class="display-5 fw-bold">{{ score.total_questions }}</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('user.view_scores') }}" class="btn btn-primary">Back to All Scores</a>
+        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary">Return to Dashboard</a>
+    </div>
+</div>
+{% endblock %} 

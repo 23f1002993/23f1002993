@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}Take Quiz - {{ quiz.chapter.name }} - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-sm btn-primary">Home</a>
+                    <a href="{{ url_for('user.subjects') }}" class="btn btn-sm btn-outline-primary">Subjects</a>
+                    <a href="{{ url_for('user.view_scores') }}" class="btn btn-sm btn-outline-primary">Scores</a>
+                    <a href="{{ url_for('user.charts') }}" class="btn btn-sm btn-outline-primary">Charts</a>
+                </div>
+                <h5 class="mb-0">Welcome, {{ current_user.full_name }}!</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.subjects') }}">Subjects</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.view_chapters', subject_id=quiz.chapter.subject_id) }}">{{ quiz.chapter.subject.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.view_quizzes', chapter_id=quiz.chapter_id) }}">{{ quiz.chapter.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Take Quiz</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <h5 class="mb-0">{{ quiz.chapter.subject.name }} - {{ quiz.chapter.name }}</h5>
+                <div>
+                    <span class="badge bg-warning text-dark">Duration: {{ quiz.time_duration }}</span>
+                    <span class="badge bg-info">Date: {{ quiz.date_of_quiz }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('user.submit_quiz', quiz_id=quiz.id) }}" id="quiz-form">
+                    {% for question in questions %}
+                    <div class="card mb-4 question-card {% if loop.first %}active{% else %}d-none{% endif %}" data-question="{{ loop.index }}">
+                        <div class="card-header bg-light d-flex justify-content-between">
+                            <h6>Question {{ loop.index }} of {{ questions|length }}</h6>
+                            <div class="quiz-timer text-danger fw-bold"></div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="question-statement mb-4">{{ question.question_statement }}</h5>
+                            
+                            <div class="options-list">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="answer{{ question.id }}" id="option1_{{ question.id }}" value="1" required>
+                                    <label class="form-check-label" for="option1_{{ question.id }}">
+                                        <span class="option-number">1</span> {{ question.option1 }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="answer{{ question.id }}" id="option2_{{ question.id }}" value="2">
+                                    <label class="form-check-label" for="option2_{{ question.id }}">
+                                        <span class="option-number">2</span> {{ question.option2 }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="answer{{ question.id }}" id="option3_{{ question.id }}" value="3">
+                                    <label class="form-check-label" for="option3_{{ question.id }}">
+                                        <span class="option-number">3</span> {{ question.option3 }}
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="answer{{ question.id }}" id="option4_{{ question.id }}" value="4">
+                                    <label class="form-check-label" for="option4_{{ question.id }}">
+                                        <span class="option-number">4</span> {{ question.option4 }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer d-flex justify-content-between">
+                            {% if not loop.first %}
+                            <button type="button" class="btn btn-secondary prev-question">Previous</button>
+                            {% else %}
+                            <div></div>
+                            {% endif %}
+                            
+                            {% if not loop.last %}
+                            <button type="button" class="btn btn-primary next-question">Next</button>
+                            {% else %}
+                            <button type="submit" class="btn btn-success">Submit Quiz</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<style>
+    .option-number {
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        line-height: 25px;
+        text-align: center;
+        border-radius: 50%;
+        background-color: #6c757d;
+        color: white;
+        margin-right: 10px;
+    }
+    
+    .form-check-input:checked + label .option-number {
+        background-color: #0d6efd;
+    }
+    
+    .question-card {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Navigate between questions
+        const nextButtons = document.querySelectorAll('.next-question');
+        const prevButtons = document.querySelectorAll('.prev-question');
+        const questionCards = document.querySelectorAll('.question-card');
+        
+        nextButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const currentCard = this.closest('.question-card');
+                const currentIndex = parseInt(currentCard.dataset.question);
+                const nextCard = document.querySelector(`.question-card[data-question="${currentIndex + 1}"]`);
+                
+                if (nextCard) {
+                    currentCard.classList.remove('active');
+                    currentCard.classList.add('d-none');
+                    nextCard.classList.remove('d-none');
+                    nextCard.classList.add('active');
+                    
+                    // Check if required option is selected
+                    const inputs = currentCard.querySelectorAll('input[type="radio"]');
+                    const isAnyChecked = Array.from(inputs).some(input => input.checked);
+                    
+                    if (!isAnyChecked) {
+                        alert('Please select an answer before proceeding.');
+                        currentCard.classList.remove('d-none');
+                        currentCard.classList.add('active');
+                        nextCard.classList.remove('active');
+                        nextCard.classList.add('d-none');
+                    }
+                }
+            });
+        });
+        
+        prevButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const currentCard = this.closest('.question-card');
+                const currentIndex = parseInt(currentCard.dataset.question);
+                const prevCard = document.querySelector(`.question-card[data-question="${currentIndex - 1}"]`);
+                
+                if (prevCard) {
+                    currentCard.classList.remove('active');
+                    currentCard.classList.add('d-none');
+                    prevCard.classList.remove('d-none');
+                    prevCard.classList.add('active');
+                }
+            });
+        });
+        
+        // Submit form validation
+        const quizForm = document.getElementById('quiz-form');
+        
+        quizForm.addEventListener('submit', function(e) {
+            const allQuestions = document.querySelectorAll('.question-card');
+            let allAnswered = true;
+            
+            allQuestions.forEach(question => {
+                const inputs = question.querySelectorAll('input[type="radio"]');
+                const isAnyChecked = Array.from(inputs).some(input => input.checked);
+                
+                if (!isAnyChecked) {
+                    allAnswered = false;
+                    const questionNumber = question.dataset.question;
+                    alert(`Please answer question ${questionNumber} before submitting.`);
+                }
+            });
+            
+            if (!allAnswered) {
+                e.preventDefault();
+            } else if (!confirm('Are you sure you want to submit your quiz?')) {
+                e.preventDefault();
+            }
+        });
+        
+        // Timer functionality
+        const timerElements = document.querySelectorAll('.quiz-timer');
+        
+        if (timerElements.length > 0) {
+            // Parse duration from string (assuming format like "30")
+            const durationText = "{{ quiz.time_duration }}";
+            let durationMinutes = 30; // Default 30 minutes
+            
+            if (durationText) {
+                // Try to parse as integer
+                const parsedDuration = parseInt(durationText);
+                if (!isNaN(parsedDuration)) {
+                    durationMinutes = parsedDuration;
+                }
+            }
+            
+            const totalSeconds = durationMinutes * 60;
+            let secondsRemaining = totalSeconds;
+            
+            function updateTimer() {
+                const minutes = Math.floor(secondsRemaining / 60);
+                const seconds = secondsRemaining % 60;
+                
+                const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                timerElements.forEach(el => {
+                    el.textContent = timeString;
+                    
+                    // Visual indication when time is running low
+                    if (secondsRemaining < 60) {
+                        el.classList.add('text-danger', 'fw-bold');
+                    }
+                });
+                
+                if (secondsRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's up! Your quiz will be submitted automatically.");
+                    quizForm.submit();
+                }
+                
+                secondsRemaining--;
+            }
+            
+            updateTimer(); // Initialize immediately
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}My Performance Charts - Quiz Master{% endblock %}
+
+{% block head %}
+<style>
+    .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">My Performance Charts</h1>
+        <div class="alert alert-info">
+            <p>View your performance statistics across different subjects.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Average Scores by Subject</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="subjectScoresChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Quiz Attempts by Subject</h5>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="subjectAttemptsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- No Data Message -->
+{% if not avg_scores %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-warning">
+            <h4 class="alert-heading">No data available!</h4>
+            <p>You haven't taken any quizzes yet. Take some quizzes to see your performance charts.</p>
+            <hr>
+            <p class="mb-0">Go to <a href="{{ url_for('user.subjects') }}" class="alert-link">Subjects</a> to find quizzes to take.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if avg_scores %}
+    // Subject Scores Chart
+    var subjectScoresCtx = document.getElementById('subjectScoresChart').getContext('2d');
+    var subjectScoresChart = new Chart(subjectScoresCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for subject_name in avg_scores %}
+                    "{{ subject_name }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Average Score (%)',
+                data: [
+                    {% for subject_name, avg_score in avg_scores.items() %}
+                        {{ avg_score }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Average Score (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Subject'
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Subject Attempts Chart
+    var subjectAttemptsCtx = document.getElementById('subjectAttemptsChart').getContext('2d');
+    var subjectAttemptsChart = new Chart(subjectAttemptsCtx, {
+        type: 'pie',
+        data: {
+            labels: [
+                {% for subject_name in subject_attempts %}
+                    "{{ subject_name }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for subject_name, attempts in subject_attempts.items() %}
+                        {{ attempts }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                },
+                title: {
+                    display: true,
+                    text: 'Quiz Attempts Distribution'
+                }
+            }
+        }
+    });
+    {% endif %}
+});
+</script>
+{% endblock %} 

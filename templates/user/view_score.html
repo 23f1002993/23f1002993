@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}View Score - Quiz App{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-light text-center">
+        <h5>View the Quiz Result</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label text-end">ID :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control-plaintext" value="{{ score.id }}" readonly>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label text-end">Subject :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control-plaintext" value="{{ score.quiz.chapter.subject.name }}" readonly>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-4 col-form-label text-end">Chapter :</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control-plaintext" value="{{ score.quiz.chapter.name }}" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-3 row">
+                    <label class="col-sm-6 col-form-label text-end">Number of Questions :</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control-plaintext" value="{{ score.total_questions }}" readonly>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-6 col-form-label text-end">Scheduled Date :</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control-plaintext" value="{{ score.quiz.date_of_quiz }}" readonly>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-6 col-form-label text-end">Duration(mins) :</label>
+                    <div class="col-sm-6">
+                        <input type="text" class="form-control-plaintext" value="{{ score.quiz.time_duration }}" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6 mx-auto">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white text-center">
+                        <h5>Score Summary</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <h3>{{ score.correct_answers }} / {{ score.total_questions }}</h3>
+                        <h4>{{ score.get_percentage() }}%</h4>
+                        <h2>Grade: {{ score.get_grade() }}</h2>
+                        <p class="text-muted">Attempted on: {{ score.time_stamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('user.scores') }}" class="btn btn-primary">Back to Scores</a>
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

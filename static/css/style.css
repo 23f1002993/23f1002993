@@ -1,0 +1,104 @@
+.navbar {
+    background-color: #007bff !important;
+}
+
+
+.form-label {
+    font-weight: 500;
+}
+
+
+.card {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-weight: 500;
+}
+
+
+.display-4 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+
+.question-statement {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.options-container {
+    padding: 10px;
+}
+
+.form-check-label {
+    font-size: 1.1rem;
+    padding: 5px;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+
+.border-success {
+    border-width: 2px;
+}
+
+
+footer {
+    margin-top: 30px;
+    padding: 20px 0;
+    background-color: #f8f9fa;
+}
+
+
+@media (max-width: 768px) {
+    .col-form-label.text-end {
+        text-align: left !important;
+    }
+}
+
+
+.bg-light-blue {
+    background-color: #e6f2ff;
+}
+
+.text-primary-dark {
+    color: #0056b3;
+}
+
+
+.chart-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    height: 300px;
+}
+
+
+.form-control:focus, .btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+} 

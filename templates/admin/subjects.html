@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Subjects - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">Subject Management</h1>
+        <p class="lead">Create and manage subjects for your quizzes.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Add New Subject</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.add_subject') }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Subject Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        <div class="form-text">Provide a brief description of what this subject covers.</div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Save Subject</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">All Subjects</h5>
+                <span class="badge bg-primary">{{ subjects|length }} Subjects</span>
+            </div>
+            <div class="card-body">
+                {% if subjects %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Chapters</th>
+                                <th>Total Quizzes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subject in subjects %}
+                            <tr>
+                                <td>{{ subject.name }}</td>
+                                <td>{{ subject.description }}</td>
+                                <td>{{ subject.chapters|length }}</td>
+                                <td>{{ subject.get_total_quizzes() }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('admin.edit_subject', id=subject.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="{{ url_for('admin.chapters', subject_id=subject.id) }}" class="btn btn-sm btn-info">Chapters</a>
+                                        <a href="{{ url_for('admin.delete_subject', id=subject.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this subject? This will also delete all related chapters, quizzes, and questions.')">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">No subjects available yet. Use the form to add your first subject.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add any JavaScript for the subjects page here
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Subjects page loaded');
+    });
+</script>
+{% endblock %} 

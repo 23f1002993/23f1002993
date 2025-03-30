@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Chapters - {{ subject.name }} - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.subjects') }}">Subjects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ subject.name }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">{{ subject.name }}</h5>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ subject.description }}</p>
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary me-2">{{ chapters|length }} Chapters</span>
+                    <span class="badge bg-secondary me-2">{{ subject.get_total_quizzes() }} Quizzes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Available Chapters</h5>
+                <a href="{{ url_for('user.subjects') }}" class="btn btn-sm btn-primary">Back to Subjects</a>
+            </div>
+            <div class="card-body">
+                {% if chapters %}
+                <div class="row">
+                    {% for chapter in chapters %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm hover-card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">{{ chapter.name }}</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">{{ chapter.description|truncate(100) }}</p>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-info">{{ chapter.quizzes|length }} Quizzes</span>
+                                    {% set open_quizzes = [] %}
+                                    {% for quiz in chapter.quizzes %}
+                                        {% if quiz.get_status(current_user) == 'Open' %}
+                                            {% set _ = open_quizzes.append(quiz) %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if open_quizzes %}
+                                        <span class="badge bg-success">{{ open_quizzes|length }} Available</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-footer bg-light text-center">
+                                <a href="{{ url_for('user.view_quizzes', chapter_id=chapter.id) }}" class="btn btn-primary btn-sm">View Quizzes</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">No chapters available for this subject yet. Please check back later.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Chapters page loaded');
+    });
+</script>
+{% endblock %} 

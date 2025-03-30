@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}All Subjects - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Subjects</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Available Subjects</h5>
+            </div>
+            <div class="card-body">
+                <p>Browse through our subjects and take quizzes to test your knowledge.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if subjects %}
+        {% for subject in subjects %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ subject.name }}</h5>
+                    <span class="badge bg-light text-primary">{{ subject.get_total_quizzes() }} Quizzes</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ subject.description }}</p>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <span class="badge bg-info">{{ subject.chapters|length }} Chapters</span>
+                        
+                        {% set open_quiz_count = 0 %}
+                        {% for chapter in subject.chapters %}
+                            {% for quiz in chapter.quizzes %}
+                                {% if quiz.get_status(current_user) == 'Open' %}
+                                    {% set open_quiz_count = open_quiz_count + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                        
+                        {% if open_quiz_count > 0 %}
+                        <span class="badge bg-success">{{ open_quiz_count }} Available</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer bg-light text-center">
+                    <a href="{{ url_for('user.view_chapters', subject_id=subject.id) }}" class="btn btn-primary">View Chapters</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <p class="mb-0">No subjects available yet. Please check back later.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Subjects page loaded');
+    });
+</script>
+{% endblock %} 

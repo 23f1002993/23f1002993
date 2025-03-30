@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+
+{% block title %}View Quiz - Quiz Master{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-sm btn-primary">Home</a>
+                    <a href="{{ url_for('user.subjects') }}" class="btn btn-sm btn-outline-primary">Subjects</a>
+                    <a href="{{ url_for('user.view_scores') }}" class="btn btn-sm btn-outline-primary">Scores</a>
+                    <a href="{{ url_for('user.charts') }}" class="btn btn-sm btn-outline-primary">Charts</a>
+                </div>
+                <h5 class="mb-0">Welcome, {{ current_user.full_name }}!</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('user.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.subjects') }}">Subjects</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.view_chapters', subject_id=subject.id) }}">{{ subject.name }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('user.view_quizzes', chapter_id=chapter.id) }}">{{ chapter.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Quiz Details</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Quiz Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>ID:</strong> {{ quiz.id }}</p>
+                        <p><strong>Subject:</strong> {{ subject.name }}</p>
+                        <p><strong>Chapter:</strong> {{ chapter.name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Date:</strong> {{ quiz.date_of_quiz }}</p>
+                        <p><strong>Duration:</strong> {{ quiz.time_duration }}</p>
+                        <p><strong>Questions:</strong> {{ questions|length }}</p>
+                    </div>
+                </div>
+                
+                {% if quiz.remarks %}
+                <div class="alert alert-info">
+                    <strong>Remarks:</strong> {{ quiz.remarks }}
+                </div>
+                {% endif %}
+                
+                {% set status = quiz.get_status(current_user) %}
+                <div class="d-grid gap-2">
+                    {% if status == 'Open' %}
+                        <a href="{{ url_for('user.take_quiz', quiz_id=quiz.id) }}" class="btn btn-success btn-lg">Take Quiz</a>
+                    {% elif status == 'Taken' %}
+                        <button class="btn btn-secondary btn-lg mb-2" disabled>Quiz Already Taken</button>
+                        <a href="{{ url_for('user.view_score_detail', score_id=user_score.id) }}" class="btn btn-primary btn-lg">View My Score</a>
+                    {% elif status == 'Coming Soon' %}
+                        <button class="btn btn-warning btn-lg" disabled>Coming Soon - Available on {{ quiz.date_of_quiz }}</button>
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg" disabled>Quiz Unavailable</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Quiz Questions</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    This preview shows the question structure. Actual answers will be available during the quiz.
+                </div>
+                
+                <div class="accordion" id="questionsAccordion">
+                    {% for question in questions %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ question.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ question.id }}" aria-expanded="false" aria-controls="collapse{{ question.id }}">
+                                Question {{ loop.index }}: {{ question.question_statement|truncate(70) }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ question.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ question.id }}" data-bs-parent="#questionsAccordion">
+                            <div class="accordion-body">
+                                <p><strong>{{ question.question_statement }}</strong></p>
+                                <div class="options-list mt-3">
+                                    <div class="option-item mb-2 p-2 border rounded">
+                                        Option 1: {{ question.option1 }}
+                                    </div>
+                                    <div class="option-item mb-2 p-2 border rounded">
+                                        Option 2: {{ question.option2 }}
+                                    </div>
+                                    <div class="option-item mb-2 p-2 border rounded">
+                                        Option 3: {{ question.option3 }}
+                                    </div>
+                                    <div class="option-item mb-2 p-2 border rounded">
+                                        Option 4: {{ question.option4 }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if not questions %}
+                <div class="alert alert-info">
+                    <p class="mb-0">No questions have been added to this quiz yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Quiz Instructions</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-info-circle me-2"></i> This quiz contains {{ questions|length }} multiple-choice questions.
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-clock me-2"></i> You have {{ quiz.time_duration }} to complete the quiz.
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-check2-circle me-2"></i> Each question has only one correct answer.
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-graph-up me-2"></i> Your score will be available immediately after completion.
+                    </li>
+                    <li class="list-group-item d-flex align-items-center">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i> You cannot retake the quiz once submitted.
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        {% if user_score %}
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Your Score</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="score-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px; border-radius: 50%; background-color: #f8f9fa; border: 10px solid 
+                {% if user_score.get_percentage() >= 80 %}#28a745
+                {% elif user_score.get_percentage() >= 60 %}#ffc107
+                {% else %}#dc3545{% endif %};">
+                    <div>
+                        <h1 class="display-4 mb-0">{{ user_score.get_percentage() }}%</h1>
+                        <p class="mb-0">Grade: {{ user_score.get_grade() }}</p>
+                    </div>
+                </div>
+                <p><strong>Correct Answers:</strong> {{ user_score.correct_answers }}/{{ user_score.total_questions }}</p>
+                <p><strong>Date Taken:</strong> {{ user_score.time_stamp.strftime('%Y-%m-%d %H:%M') }}</p>
+                <a href="{{ url_for('user.view_score_detail', score_id=user_score.id) }}" class="btn btn-primary">View Details</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<style>
+    .option-item:hover {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock %} 
